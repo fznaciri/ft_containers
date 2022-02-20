@@ -1,8 +1,9 @@
 #ifndef VECTOR_HPP
 # define VECTOR_HPP
-#include <memory>
-#include <stdexcept>
-
+# include <iostream>
+# include <memory>
+# include <stdexcept>
+# include "tools.hpp"
 
 
 namespace ft {
@@ -175,18 +176,26 @@ namespace ft {
 
 
     };
-    // template <class T, class Alloc>
-    // bool operator== (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-    // template <class T, class Alloc>
-    // bool operator!= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-    // template <class T, class Alloc>
-    // bool operator<  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-    // template <class T, class Alloc>
-    // bool operator<= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-    // template <class T, class Alloc>
-    // bool operator>  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
-    // template <class T, class Alloc>
-    // bool operator>= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs);
+    template <class T, class Alloc>
+    bool operator== (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) {
+        return (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
+    }
+    template <class T, class Alloc>
+    bool operator!= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs)
+    {
+        return (!(lhs == rhs));
+    }
+    template <class T, class Alloc>
+    bool operator<  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { 
+        return (lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end())); }
+    template <class T, class Alloc>
+    bool operator<= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) {
+        return ((lhs < rhs) || (lhs == rhs));
+    }
+    template <class T, class Alloc>
+    bool operator>  (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return (rhs < lhs); }
+    template <class T, class Alloc>
+    bool operator>= (const vector<T,Alloc>& lhs, const vector<T,Alloc>& rhs) { return (rhs <= lhs) ; }
     template <class T, class Alloc>
     void swap (vector<T,Alloc>& x, vector<T,Alloc>& y) { x.swap(y); }
 
