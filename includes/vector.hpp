@@ -4,6 +4,7 @@
 # include <memory>
 # include <stdexcept>
 # include "tools.hpp"
+# include "random_access_iterator.hpp"
 
 
 namespace ft {
@@ -16,11 +17,11 @@ namespace ft {
             typedef const value_type& const_reference;
             typedef value_type* pointer;
             typedef const value_type*  const_pointer;
-            // typedef iterator ft::random access iterator<value_type>;
-            // typedef const_iterator const iterator;
+            typedef ft::random_access_iterator<value_type> iterator;
+            typedef ft::random_access_iterator<const value_type> const_iterator;
             // typedef reverse_iterator ft::reverse_iterator<ft::random access iterator<value_type>>;
             // typedef const_reverse_iterator reverse_iterator;
-            typedef difference_type ptrdiff_t;
+            typedef ptrdiff_t difference_type;
             typedef size_t size_type;
 
             explicit vector (const allocator_type& alloc = allocator_type()) : _alloc(alloc), _arr(NULL), _size(0), _capacity(0) {}
@@ -30,9 +31,16 @@ namespace ft {
                 for (size_type i = 0; i < n; i++)
                     _alloc.construct(_arr + i, val);
             }
-            // template <class InputIterator>
-            // vector (InputIterator first, InputIterator last,
-            //         const allocator_type& alloc = allocator_type(), );	
+            template <class InputIterator>
+            vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
+                typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type = InputIterator()) : _alloc(alloc)
+            {
+                difference_type d = abs(std::distance(first, last));
+                reserve(d);
+                _size = d;
+                for (size_type i = 0; first != last; i++, first++)
+                    _alloc.construct(_arr + i, *first);
+            }
             vector (const vector& x)
             {
                 *this = x;
@@ -56,10 +64,10 @@ namespace ft {
                 _alloc.deallocate(_arr, _capacity);
             }
 
-            // iterator begin() { return iterator(_arr); }
-            // const_iterator begin() const { return const_iterator(_arr); }
-            // iterator end() { return iterator(_arr + _size); }
-            // const_iterator end() const { return const_iterator(_arr + _size); }
+            iterator begin() { return iterator(_arr); }
+            const_iterator begin() const { return const_iterator(_arr); }
+            iterator end() { return iterator(_arr + _size); }
+            const_iterator end() const { return const_iterator(_arr + _size); }
             // reverse_iterator rbegin() { return reverse_iterator(end()); }
             // const_reverse_iterator rbegin() const { return reverse_iterator(end()); }
             // reverse_iterator rend() { return reverse_iterator(begin()); }
@@ -129,7 +137,7 @@ namespace ft {
                 for (size_type i = 0; i < n; i++)
                     _alloc.construct(_arr + i, val);
                 if (n < _size)
-                    for (; i < _size; i++)
+                    for (size_type i = 0; i < _size; i++)
                          _alloc.destroy(_arr + i);
                 _size = n;
             }
@@ -146,11 +154,22 @@ namespace ft {
                 _alloc.destroy(_arr + _size - 1);
                 _size--;
             }
-            // iterator insert (iterator position, const value_type& val);
+            // iterator insert (iterator position, const value_type& val)
+            // {
+
+            // }
             // void insert (iterator position, size_type n, const value_type& val);	
             // template <class InputIterator>
             // void insert (iterator position, InputIterator first, InputIterator last);
-            // iterator erase (iterator position);
+            iterator erase (iterator position)
+            {
+                difference_type d = abs(std::distance(begin(), position));
+                _size--;
+                for (size_type i = d; i < _size; i++)
+                    std::swap(_arr[i], _arr[i + 1]);
+                _alloc.destroy((_arr - 1)  + d);
+                return iterator(_arr + d);
+            }
             // iterator erase (iterator first, iterator last); 
             void clear()
             {
