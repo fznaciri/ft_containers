@@ -20,9 +20,9 @@ namespace ft
             random_access_iterator(pointer ptr) : _ptr(ptr) {}
             random_access_iterator(random_access_iterator const& x) : _ptr(x._ptr) {}
             ~random_access_iterator() {}
-            random_access_iterator& operator= (random_access_iterator const& x)
+            random_access_iterator & operator= (random_access_iterator const & src)
             {
-                _ptr = x.base();
+                this->_ptr = src.base();
                 return *this;
             }
             operator random_access_iterator<const value_type>()
@@ -31,8 +31,8 @@ namespace ft
             }
             bool    operator== (random_access_iterator const& x) { return _ptr == x.base(); }
             bool    operator!= (random_access_iterator const& x) { return _ptr != x.base(); }
-            reference operator* () { return *_ptr; }
-            pointer operator-> () { return &(*this); }
+            reference operator* () const { return *_ptr; }
+            pointer operator-> () { return &(operator*()); }
             random_access_iterator operator++ () { return random_access_iterator(++_ptr); }
             random_access_iterator operator++ (int) 
             { 
@@ -70,7 +70,7 @@ namespace ft
                tmp -= n;
                return tmp;
             }
-            reference operator[] (difference_type n) { return _ptr[n]; }
+            reference operator[] (difference_type n) const { return _ptr[n]; }
             pointer base() const { return _ptr; }
         private:
             pointer _ptr;
@@ -89,7 +89,8 @@ namespace ft
     template<class T>
     bool    operator>= (random_access_iterator<T> lhs, random_access_iterator<T> rhs) { return lhs.base() >= rhs.base(); }
     template<class T>
-    random_access_iterator<T>& operator+(typename random_access_iterator<T>::difference_type n, random_access_iterator<T> const& a) { return a + n; }
+    random_access_iterator<T> operator+(int n, random_access_iterator<T> const& a)
+    { return random_access_iterator<T>(a + n); }
 }
 
 #endif
