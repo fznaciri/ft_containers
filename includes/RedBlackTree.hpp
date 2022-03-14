@@ -15,7 +15,7 @@ namespace ft
         public:
             typedef typename T::first_type key_type; 
             typedef typename T::second_type mapped_type;
-            typedef ft::pair<const key_type,mapped_type> value_type;
+            typedef T value_type;
             typedef Compare comp;
             typedef Alloc allocator_type;
             typedef typename allocator_type::reference reference;
@@ -28,9 +28,9 @@ namespace ft
             typedef ft::reverse_iterator<const iterator> const_reverse_iterator;
             typedef ptrdiff_t difference_type;
             typedef size_t size_type;
-            typedef typename allocator_type::template rebind<ft::node<value_type> >::other allocator_node;
-            typedef typename ft::node<value_type>::node_pointer node_pointer;
             typedef ft::node<value_type> node_element;
+            typedef typename ft::node<value_type>::node_pointer node_pointer;
+            typedef typename Alloc::template rebind<node_element>::other     allocator_node;
 
             RedBlackTree(const comp& com = comp(),
               const allocator_type& alloc = allocator_type()) : _alloc(alloc), _allocNode(allocator_node()), _root(NULL), _size(0), _comp(com)
@@ -40,7 +40,7 @@ namespace ft
                 _alloc.construct(&(_endNode->value), value_type());
                 _endNode->parent = NULL;
             }
-            ~RedBlackTree();
+            ~RedBlackTree() {}
 
             ft::pair<bool, bool> insert(const value_type& v)
             {
@@ -57,7 +57,15 @@ namespace ft
                 }
                 ft::pair<bool, bool> r =  add(new_node, _root);
                 checkColor(new_node);
+                return r;
             }
+
+
+            bool    empty() const { return _size == 0; }
+            size_type    size() const { return _size; }
+            size_type    max_size() const { return _allocNode.max_size(); }
+
+
             void print2DUtil(node_pointer root, int space)
             {
                 if (root == NULL)
@@ -126,19 +134,19 @@ namespace ft
             {
                 if (newnode->parent && newnode->parent->isLeft)
                 {
-                    if (newnode->parent->parent && (!newnode->parent->parent->right || (newnode->parent->parent->right && newnode->parent->parent->right->balck)))
+                    if (newnode->parent->parent && (!newnode->parent->parent->right || (newnode->parent->parent->right && newnode->parent->parent->right->black)))
                         return rotate(newnode);
-                    newnode->parent->balck = true;
+                    newnode->parent->black = true;
                     if (newnode->parent->parent != _root)
-                        newnode->parent->parent->balck = false;
+                        newnode->parent->parent->black = false;
                     newnode->parent->parent->right->black = true;
                     return;
                 }
-                if (newnode->parent->parent && (!newnode->parent->parent->left || (newnode->parent->parent->left && newnode->parent->parent->left->balck)))
+                if (newnode->parent->parent && (!newnode->parent->parent->left || (newnode->parent->parent->left && newnode->parent->parent->left->black)))
                     return rotate(newnode);
-                newnode->parent->balck = true;
+                newnode->parent->black = true;
                 if (newnode->parent->parent != _root)
-                    newnode->parent->parent->balck = false;
+                    newnode->parent->parent->black = false;
                 newnode->parent->parent->left->black = true;
             }
 
@@ -149,15 +157,15 @@ namespace ft
                     if (newnode->parent && newnode->parent->isLeft)
                     {
                         rightrotation(newnode->parent->parent);
-                        newnode->parent->balck = true;
+                        newnode->parent->black = true;
                         newnode->parent->right->black = false;
                         return;
                     }
                     else if (newnode->parent && !newnode->parent->isLeft)
                     {
                         rightleftrotation(newnode->parent->parent);
-                        newnode->balck = true;
-                        newnode->right = false;
+                        newnode->black = true;
+                        newnode->right->black = false;
                         newnode->left->black = false;
                         return;
                     }
@@ -167,15 +175,15 @@ namespace ft
                     if (newnode->parent && !newnode->parent->isLeft)
                     {
                         leftrotation(newnode->parent->parent);
-                        newnode->parent->balck = true;
+                        newnode->parent->black = true;
                         newnode->parent->left->black = false;
                         return;
                     }
                     else if (newnode->parent && !newnode->parent->isLeft)
                     {
                         leftrightrotation(newnode->parent->parent);
-                        newnode->balck = true;
-                        newnode->right = false;
+                        newnode->black = true;
+                        newnode->right->black = false;
                         newnode->left->black = false;
                         return;
                     }
@@ -191,7 +199,7 @@ namespace ft
                 if (newnode->left)
                 {
                     newnode->left->parent = newnode;
-                    newnode->left->isleft = true;
+                    newnode->left->isLeft = true;
                 }
                 if (!newnode->parent)
                 {
@@ -202,19 +210,19 @@ namespace ft
                 else
                 {
                     tmp->parent = newnode->parent;
-                    if (newnode->isleft)
+                    if (newnode->isLeft)
                     {
-                        tmp->isleft = true;
+                        tmp->isLeft = true;
                         tmp->parent->left = tmp;
                     }
                     else
                     {
-                        tmp->isleft = false;
+                        tmp->isLeft = false;
                         tmp->parent->right = tmp;
                     }
                 }
                 tmp->right = newnode;
-                newnode->isleft = false;
+                newnode->isLeft = false;
                 newnode->parent = tmp;
             }
             void leftrotation(node_pointer newnode)
@@ -226,7 +234,7 @@ namespace ft
                 if (newnode->right)
                 {
                     newnode->right->parent = newnode;
-                    newnode->right->isleft = false;
+                    newnode->right->isLeft = false;
                 }
                 if (!newnode->parent)
                 {
@@ -237,19 +245,19 @@ namespace ft
                 else
                 {
                     tmp->parent = newnode->parent;
-                    if (newnode->isleft)
+                    if (newnode->isLeft)
                     {
-                        tmp->isleft = true;
+                        tmp->isLeft = true;
                         tmp->parent->left = tmp;
                     }
                     else
                     {
-                        tmp->isleft = false;
+                        tmp->isLeft = false;
                         tmp->parent->right = tmp;
                     }
                 }
                 tmp->left = newnode;
-                newnode->isleft = true;
+                newnode->isLeft = true;
                 newnode->parent = tmp; 
             }
             void leftrightrotation(node_pointer newnode)

@@ -21,10 +21,21 @@ time_t get_time(void)
 int     main()
 {
    ft::RedBlackTree<ft::pair<int, int> > tree;
+   tree.insert(ft::make_pair(0, 0));
    tree.insert(ft::make_pair(10, 0));
    tree.insert(ft::make_pair(20, 0));
    tree.insert(ft::make_pair(30, 0));
+   tree.insert(ft::make_pair(40, 0));
+   tree.insert(ft::make_pair(50, 0));
+   tree.insert(ft::make_pair(60, 0));
+   tree.insert(ft::make_pair(70, 0));
+   tree.insert(ft::make_pair(80, 0));
+   tree.insert(ft::make_pair(90, 0));
+   tree.insert(ft::make_pair(100, 0));
    tree.print2D();
+   std::cout << "is empty : " << tree.empty() << std::endl;
+   std::cout << "is size : " << tree.size() << std::endl;
+   std::cout << "is max_size : " << tree.max_size() << std::endl;
    //tree.insert(ft::make_pair(10, 0));
    return 0;
 }

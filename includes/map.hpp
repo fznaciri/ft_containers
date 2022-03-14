@@ -56,20 +56,20 @@ namespace ft
                 const key_compare& comp = key_compare(),
                 const allocator_type& alloc = allocator_type()) : _key_comp(comp), _alloc(alloc), _tree(tree()) 
             {
-                for (; first != last; first++)
-                    _tree.insert(ft::make_pair(*first));
+                _tree(first, last);
             }
             map (const map& x) : _key_comp(x.get), _alloc(x._alloc), _tree(tree())
             {
-                iterator it = x.begin();
-                for (; it != x.end(); it++)
-                    _tree.insert(ft::make_pair(*it));
+               //_tree(x.begin(), x.end());
             }
             ~map() {}
             map& operator= (const map& x)
             {
                 clear();
-                _key_comp = x.
+                _key_comp = x.key_comp();
+                _alloc = x.get_allocator();
+                //iterator it = x.begin();
+                //_tree(x.begin(), x.end());
             }
 
             // Iterators
@@ -83,9 +83,9 @@ namespace ft
             const_reverse_iterator rend() const;
 
             // Capacity
-            bool empty() const;
-            size_type size() const;
-            size_type max_size() const;
+            bool empty() const { return _tree.empty(); }
+            size_type size() const { return _tree.size(); }
+            size_type max_size() const { return _tree.max_size(); }
             
             // Element access
             mapped_type& operator[] (const key_type& k);
@@ -103,8 +103,8 @@ namespace ft
 
 
             // Observers
-            key_compare key_comp() const;
-            value_compare value_comp() const;
+            key_compare key_comp() const { return _key_comp; }
+            value_compare value_comp() const { return value_compare(); }
 
             // Operations
             iterator find (const key_type& k);
@@ -118,7 +118,7 @@ namespace ft
             ft::pair<iterator,iterator>             equal_range (const key_type& k);
 
             // Allocator
-            allocator_type get_allocator() const;
+            allocator_type get_allocator() const { return _alloc; }
         
         
         private:
