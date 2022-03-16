@@ -158,6 +158,70 @@ namespace ft
         bool isLeft;
         node() : value(value_type()), parent(NULL), left(NULL), right(NULL), black(false), isLeft(true) {}
         node(const value_type& v) : value(v), parent(NULL), left(NULL), right(NULL), black(false), isLeft(true) {}
+        static node_pointer getSuccesser(node_pointer n)
+        {
+            node_pointer tmp;
+            if (!n->right)
+            {
+                if (n == getMax(n))
+                    return NULL;
+                if (n->isLeft && n->parent)
+                    return n->parent;
+                else if (!n->isLeft && n->parent->parent)
+                    return n->parent->parent;
+            }
+            tmp = n->right;
+            while (tmp->left)
+                tmp = tmp->left;
+            return tmp;
+        }
+        static node_pointer getPredecessor(node_pointer n)
+        {
+            node_pointer tmp = n;
+            if (!n->left)
+            {
+                if (n == getMin(n))
+                    return NULL;
+                if (!n->isLeft && n->parent)
+                    return n->parent;
+                while (tmp->value < tmp->parent->value)
+                    tmp = tmp->parent;
+                // else if (n->isLeft && n->parent->parent)
+                //     return n->parent->parent;
+                return tmp->parent;
+            }
+            tmp = n->left;
+            while (tmp->right)
+                tmp = tmp->right;
+            return tmp;
+        }
+        static node_pointer getMin(node_pointer n)
+        {
+            if (!n)
+                return NULL;
+            node_pointer tmp = getRoot(n);
+            while (tmp->left)
+                tmp = tmp->left;
+            return tmp;
+        }
+        static node_pointer getMax(node_pointer n)
+        {
+            if (!n)
+                return NULL;
+            node_pointer tmp = getRoot(n);
+            while (tmp->right)
+                tmp = tmp->right;
+            return tmp;
+        }
+        static node_pointer getRoot(node_pointer n)
+        {
+            if (!n)
+                return NULL;
+            node_pointer tmp = n;
+            while (tmp->parent)
+                tmp = tmp->parent;
+            return tmp;
+        }
     };
 }
 

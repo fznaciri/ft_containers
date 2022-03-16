@@ -56,6 +56,7 @@ namespace ft
                     return ft::make_pair(true, true);
                 }
                 ft::pair<bool, bool> r =  add(new_node, _root);
+                 _endNode->parent = _endNode->left = _root;
                 checkColor(new_node);
                 return r;
             }
@@ -65,7 +66,17 @@ namespace ft
             size_type    size() const { return _size; }
             size_type    max_size() const { return _allocNode.max_size(); }
 
+            // Iterators
+            iterator begin() { return iterator(node_element::getMin(_root) ? node_element::getMin(_root) : _endNode , _endNode); }
+            const_iterator begin() const { return const_iterator(node_element::getMin(_root) ? node_element::getMin(_root) : _endNode, _endNode); }
+            iterator end() { return iterator(_endNode, _endNode); }
+            const_iterator end() const { return const_iterator(_endNode, _endNode); }
+            reverse_iterator rbegin() { return reverse_iterator(end()); }
+            const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+            reverse_iterator rend() { return reverse_iterator(begin()); }
+            const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
+            // iterator    find()
             void print2DUtil(node_pointer root, int space)
             {
                 if (root == NULL)
@@ -271,13 +282,15 @@ namespace ft
                 leftrotation(newnode);
             }
 
-
             allocator_type  _alloc;
             allocator_node  _allocNode;
             node_pointer    _root;
             node_pointer    _endNode;
             size_type       _size;
             comp            _comp;
+            
+
+            
     };
     
 } // namespace ft
