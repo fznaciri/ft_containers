@@ -31,6 +31,14 @@ namespace ft
             typedef ft::node<value_type> node_element;
             typedef typename ft::node<value_type>::node_pointer node_pointer;
             typedef typename Alloc::template rebind<node_element>::other     allocator_node;
+            
+            allocator_type  _alloc;
+            allocator_node  _allocNode;
+            node_pointer    _root;
+            node_pointer    _endNode;
+            size_type       _size;
+            comp            _comp;
+
 
             RedBlackTree(const comp& com = comp(),
               const allocator_type& alloc = allocator_type()) : _alloc(alloc), _allocNode(allocator_node()), _root(NULL), _size(0), _comp(com)
@@ -40,7 +48,13 @@ namespace ft
                 _alloc.construct(&(_endNode->value), value_type());
                 _endNode->parent = NULL;
             }
-            ~RedBlackTree() {}
+            ~RedBlackTree()
+            {
+                clear();
+                _alloc.destroy(&_endNode->value);
+                _allocNode.destroy(_endNode);
+                _allocNode.deallocate(_endNode, 1);
+            }
 
             ft::pair<bool, bool> insert(const value_type& v)
             {
@@ -61,6 +75,31 @@ namespace ft
                 return r;
             }
 
+            size_type    erase(key_type const& key)
+            {
+                node_pointer tmp = find(_root, key);
+                std::cout << tmp->value.first << std::endl;
+                if (!tmp)
+                    return 0;
+                tmp = swap_poisition(tmp);
+                if (!tmp->black || _root == tmp)
+                    removeBST(tmp);
+                else
+                {
+                    fixDoubleBlack(tmp);
+                    removeBST(tmp);
+                }
+                balckNode(_root);
+                _endNode->parent = _root;
+                _endNode->left = _root;
+                return 1;
+            }
+
+            void    clear()
+            {
+                while (_root)
+                    erase(_root->value.first));
+            }
 
             bool    empty() const { return _size == 0; }
             size_type    size() const { return _size; }
@@ -76,7 +115,21 @@ namespace ft
             reverse_iterator rend() { return reverse_iterator(begin()); }
             const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
-            // iterator    find()
+
+            iterator lower_bound(key_type const& key) { return iterator(find_lowerbound(_root, key), _endNode); }
+            const_iterator lower_bound(key_type const& key) const { return const_iterator(find_lowerbound(_root, key), _endNode); }
+            iterator upper_bound(key_type const& key) { return iterator(find_upperbound(_root, key), _endNode); }
+            const_iterator upper_bound(key_type const& key) const { return const_iterator(find_upperbound(_root, key), _endNode); }
+
+            iterator    find(key_type const& key) {   return iterator(find(_root, key), _endNode); }
+            const_iterator  find(key_type const& key) const {   return const_iterator(find(_root, key), _endNode); }
+            size_type contain(key_type const& key) const
+            {
+                if (find(_root, key) == _endNode)
+                    return 0;
+                return 1;
+            }
+
             void print2DUtil(node_pointer root, int space)
             {
                 if (root == NULL)
@@ -282,12 +335,162 @@ namespace ft
                 leftrotation(newnode);
             }
 
-            allocator_type  _alloc;
-            allocator_node  _allocNode;
-            node_pointer    _root;
-            node_pointer    _endNode;
-            size_type       _size;
-            comp            _comp;
+            node_pointer    find(node_pointer root, key_type const& k) const
+            {
+                if (!root)
+                    return _endNode;
+                if (root->value.first == k)
+                    return root;
+                if (_comp(root->value.first, k))
+                    return find(root->right, k);
+                return find(root->left, k);
+            }
+            node_pointer    find_lowerbound(node_pointer root, key_type const& k) const
+            {
+                if (root->value.first == k)
+                    return root;
+                if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && !root->left)
+                    return node_element::getSuccesser(root);
+                if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && root->left && _comp(root->left->value.first, k))
+                    return node_element::getSuccesser(root);
+                if (root->isLeft && _comp(root->value.first, k) && !root->right)
+                    return node_element::getSuccesser(root);
+                if (_comp(root->value.first, k))
+                    return find_lowerbound(root->right, k);
+                return find_lowerbound(root->left, k);
+            }
+            node_pointer    find_upperbound(node_pointer root, key_type const& k) const
+            {
+                if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && !root->left)
+                    return node_element::getSuccesser(root);
+                if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && root->left && _comp(root->left->value.first, k))
+                    return node_element::getSuccesser(root);
+                if (root->isLeft && _comp(root->value.first, k) && !root->right)
+                    return node_element::getSuccesser(root);
+                if (_comp(root->value.first, k))
+                    return find_lowerbound(root->right, k);
+                return find_lowerbound(root->left, k);
+            }
+            void    fixDoubleBlack(node_pointer db)
+        
+            {
+                node_pointer s;
+                while (db)
+                {
+                    
+                    s = node_element::getSebling(db);
+                    if (!db->parent)
+                        return ;
+                    if ((!s || (s && s->black && (!s->right || (s->right && s->right->black))
+                        && (!s->left || (s->left && s->left->black)))))
+                    {
+                        if (s)
+                            s->black = false;
+                        if (!db->parent->black)
+                        {
+                            db->parent->black = true;
+                            return;
+                        }
+                        else  
+                            return fixDoubleBlack(db->parent);
+                    }
+                    else if (s && !s->black)
+                    {
+                        std::swap(s->black, db->parent->black);
+                        if (db->isLeft)
+                            leftrotation(db->parent);
+                        else
+                            rightrotation(db->parent);
+                        return fixDoubleBlack(db);
+                    }
+                    else if (!s || s->black)
+                    {
+                        if (db->isLeft && (((!s->left || (s->left && s->left->black)) && (s->right && !s->right->black)) || (s->right && !s->right->black)))
+                        {
+                            std::swap(s->black, db->black);
+                            leftrotation(db->parent);
+                            s->right->black = true;
+                            return;
+                        }
+                        else if (!db->isLeft && (s->left && !s->left->black) && (!s->right || (s->right && s->right->black)))
+                        {
+                            std::swap(s->black, db->black);
+                            rightrotation(db->parent);
+                            return;
+                        }
+                        if (db->isLeft && (s->left && !s->left->black))
+                        {
+                            std::swap(s->black, s->left->black);
+                            rightrotation(s);
+                        }
+                        else if (!db->isLeft && (s->right && !s->right->black))
+                        {
+                            std::swap(s->black, s->right->black);
+                            leftrotation(s);
+                        }
+                    }
+                }
+            }
+            void    removeBST(node_pointer n)
+            {
+                if (!n)
+                    return ;
+                if (!n->left && !n->right)
+                {
+                    if (n->isLeft && n != _root)
+                        n->parent->left = NULL;
+                    else if (!n->isLeft && n != _root)
+                        n->parent->right = NULL;
+                    if (n == _root)
+                        _root = NULL;
+                    _alloc.destroy(&(n->value));
+                    _allocNode.destroy(n);
+                    _allocNode.deallocate(n, 1);
+                    _size--;
+                    return ;
+                }
+            }
+            node_pointer    swap_poisition(node_pointer n)
+            {
+                node_pointer tmp;
+                if (!n)
+                    return NULL;
+                if (!n->left && !n->right)
+                    return n;
+                tmp = n->right;
+                while (tmp->left)
+                    tmp = tmp->left;
+                if (!tmp)
+                {
+                    tmp = n->left;
+                    while (tmp->right)
+                        tmp = tmp->right;
+                }
+                if (tmp->right || tmp->left)
+                    swap_poisition(tmp);
+                ft::pair<key_type, mapped_type> tmp1(n->value);
+                _alloc.construct(&n->value, tmp->value);
+                _alloc.construct(&tmp->value, tmp1);
+                return tmp;
+            }
+
+            int    balckNode(node_pointer n)
+            {
+                if (n == NULL)
+                    return 1;
+                int rightBlackNode = balckNode(n->right);
+                int leftBlackNode = balckNode(n->left);
+                if (leftBlackNode != rightBlackNode)
+                {
+                    std::cout << "unbalnced " << leftBlackNode << " " << rightBlackNode << std::endl;
+                    std::cout << n->value << std::endl;
+                    //print2D();
+                    //return 1;
+                }
+                if (n->black)
+                    leftBlackNode++;
+                return leftBlackNode;
+            }
             
 
             

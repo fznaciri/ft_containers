@@ -68,19 +68,18 @@ namespace ft
                 clear();
                 _key_comp = x.key_comp();
                 _alloc = x.get_allocator();
-                //iterator it = x.begin();
-                //_tree(x.begin(), x.end());
+                insert(x.begin(), x.end());
             }
 
             // Iterators
-            iterator begin();
-            const_iterator begin() const;
-            iterator end();
-            const_iterator end() const;
-            reverse_iterator rbegin();
-            const_reverse_iterator rbegin() const;
-            reverse_iterator rend();
-            const_reverse_iterator rend() const;
+            iterator begin() { return _tree.begin(); }
+            const_iterator begin() const { return _tree.begin(); }
+            iterator end() { return _tree.end(); } 
+            const_iterator end() const { return _tree.end(); }
+            reverse_iterator rbegin() { return _tree.rbegin(); }
+            const_reverse_iterator rbegin() const { return _tree.rbegin(); }
+            reverse_iterator rend() { return _tree.rend(); }
+            const_reverse_iterator rend() const { return _tree.rend(); }
 
             // Capacity
             bool empty() const { return _tree.empty(); }
@@ -88,18 +87,53 @@ namespace ft
             size_type max_size() const { return _tree.max_size(); }
             
             // Element access
-            mapped_type& operator[] (const key_type& k);
+            mapped_type& operator[] (const key_type& k) 
+            {
+                iterator tmp = find(k);
+                if (tmp == end())
+                    tmp = insert(begin(), pair<Key, T>(k, T()));
+                return tmp->second;
+            }
             
             // Modifiers
-            ft::pair<iterator,bool> insert (const value_type& val);	
-            iterator insert (iterator position, const value_type& val);
+            ft::pair<iterator,bool> insert (const value_type& val) { return _tree.insert(val); }
+            iterator insert (iterator position, const value_type& val)
+            {
+                (void)position;
+                return _tree.insert(val);
+            }
             template <class InputIterator>
-            void insert (InputIterator first, InputIterator last);
-            void erase (iterator position);
-            size_type erase (const key_type& k);
-            void erase (iterator first, iterator last);
-            void swap (map& x);
-            void clear();
+            void insert (InputIterator first, InputIterator last)
+            {
+                while (first != last)
+                    _tree.insert(ft::make_pair(first->first, first->second));
+            }
+            void erase (iterator position) { _tree.erase(position->first); }
+            size_type erase (const key_type& k) { return _tree.erase(k); }
+            void erase (iterator first, iterator last)
+            {
+                ft::vector <key_type> key_to_remove;
+				while (first != last)
+				{
+					key_to_remove.push_back(first->first);
+                    first++;
+				}
+				for (size_t i = 0; i < key_to_remove.size(); i++)
+                    _tree.erase(key_to_remove[i]);
+            }
+            void swap (map& x)
+            {
+                std::swap(x._tree._endNode, _tree._endNode);
+				std::swap(x._tree._root, _tree._root);
+				std::swap(x._tree._allocNode, _tree._allocNode);
+				std::swap(x._tree._alloc, _tree._alloc);
+				std::swap(x._tree._size, _tree._size);
+				
+				std::swap(x._key_comp, _key_comp);
+				std::swap(x._alloc, _alloc);
+
+            }
+            void clear() { _tree.clear(); }
 
 
             // Observers
@@ -107,9 +141,9 @@ namespace ft
             value_compare value_comp() const { return value_compare(); }
 
             // Operations
-            iterator find (const key_type& k);
-            const_iterator find (const key_type& k) const;
-            size_type count (const key_type& k) const;
+            iterator find (const key_type& k) { return _tree.find(k); }
+            const_iterator find (const key_type& k) const { return _tree.find(k); }
+            size_type count (const key_type& k) const { return _tree.contain(k); }
             iterator lower_bound (const key_type& k);
             const_iterator lower_bound (const key_type& k) const;
             iterator upper_bound (const key_type& k);

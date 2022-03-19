@@ -222,6 +222,14 @@ namespace ft
                 tmp = tmp->parent;
             return tmp;
         }
+        static node_pointer getSebling(node_pointer n)
+        {
+            if (n->isLeft && n->parent && n->parent->right)
+                return n->parent->right;
+            else if (!n->isLeft && n->parent && n->parent->left)
+                return n->parent->left;
+            return NULL;
+        }
     };
 }
 
