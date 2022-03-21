@@ -89,7 +89,7 @@ namespace ft
                     fixDoubleBlack(tmp);
                     removeBST(tmp);
                 }
-                balckNode(_root);
+                //balckNode(_root);
                 _endNode->parent = _root;
                 _endNode->left = _root;
                 return 1;
@@ -97,8 +97,8 @@ namespace ft
 
             void    clear()
             {
-                while (_root)
-                    erase(_root->value.first));
+                // while (_root)
+                //     erase(_root->value.first);
             }
 
             bool    empty() const { return _size == 0; }
@@ -116,10 +116,10 @@ namespace ft
             const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
 
-            iterator lower_bound(key_type const& key) { return iterator(find_lowerbound(_root, key), _endNode); }
-            const_iterator lower_bound(key_type const& key) const { return const_iterator(find_lowerbound(_root, key), _endNode); }
-            iterator upper_bound(key_type const& key) { return iterator(find_upperbound(_root, key), _endNode); }
-            const_iterator upper_bound(key_type const& key) const { return const_iterator(find_upperbound(_root, key), _endNode); }
+            iterator lower_bound(key_type const& key) { return iterator(find_lowerbound(key), _endNode); }
+            const_iterator lower_bound(key_type const& key) const { return const_iterator(find_lowerbound(key), _endNode); }
+            iterator upper_bound(key_type const& key) { return iterator(find_upperbound(key), _endNode); }
+            const_iterator upper_bound(key_type const& key) const { return const_iterator(find_upperbound(key), _endNode); }
 
             iterator    find(key_type const& key) {   return iterator(find(_root, key), _endNode); }
             const_iterator  find(key_type const& key) const {   return const_iterator(find(_root, key), _endNode); }
@@ -345,32 +345,49 @@ namespace ft
                     return find(root->right, k);
                 return find(root->left, k);
             }
-            node_pointer    find_lowerbound(node_pointer root, key_type const& k) const
+            node_pointer    find_lowerbound(key_type const& k) const
             {
-                if (root->value.first == k)
-                    return root;
-                if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && !root->left)
-                    return node_element::getSuccesser(root);
-                if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && root->left && _comp(root->left->value.first, k))
-                    return node_element::getSuccesser(root);
-                if (root->isLeft && _comp(root->value.first, k) && !root->right)
-                    return node_element::getSuccesser(root);
-                if (_comp(root->value.first, k))
-                    return find_lowerbound(root->right, k);
-                return find_lowerbound(root->left, k);
+                node_pointer n = find(_root, k);
+                if (n == _endNode)
+                    return find_upperbound(k);
+                return n;
             }
-            node_pointer    find_upperbound(node_pointer root, key_type const& k) const
+            node_pointer    find_upperbound(key_type const& k) const
             {
-                if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && !root->left)
-                    return node_element::getSuccesser(root);
-                if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && root->left && _comp(root->left->value.first, k))
-                    return node_element::getSuccesser(root);
-                if (root->isLeft && _comp(root->value.first, k) && !root->right)
-                    return node_element::getSuccesser(root);
-                if (_comp(root->value.first, k))
-                    return find_lowerbound(root->right, k);
-                return find_lowerbound(root->left, k);
+                node_pointer n = _root;
+                while (n)
+                {
+                    if (_comp(n->value.first, k) && n->right)
+                        n = n->right;
+                    else if (n->value.first == k)
+                        n = n->right;
+                    else if (n->left)
+                        n = n->left;
+                    else
+                    {
+                        while (n->parent)
+                        {
+                            if (_comp(n->value.first, k))
+                                n = n->parent;
+                            else
+                                return n;
+                        }
+                    }
+                }
+                return n;
             }
+            // node_pointer    find_upperbound(node_pointer root, key_type const& k) const
+            // {
+            //     if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && !root->left)
+            //         return node_element::getSuccesser(root);
+            //     if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && root->left && _comp(root->left->value.first, k))
+            //         return node_element::getSuccesser(root);
+            //     if (root->isLeft && _comp(root->value.first, k) && !root->right)
+            //         return node_element::getSuccesser(root);
+            //     if (_comp(root->value.first, k))
+            //         return find_lowerbound(root->right, k);
+            //     return find_lowerbound(root->left, k);
+            // }
             void    fixDoubleBlack(node_pointer db)
         
             {
