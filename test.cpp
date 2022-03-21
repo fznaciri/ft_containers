@@ -98,6 +98,16 @@ int     main()
     lo = tree.lower_bound(40);
     std::cout << "upper bound  " << up->first << " " << up->second << std::endl;
     std::cout << "lower bound  " << lo->first << " " << lo->second << std::endl;
+    std::cout << "===========================================================" << std::endl << "0" << std::endl;
+    up = tree.upper_bound(0);
+    lo = tree.lower_bound(0);
+    std::cout << "upper bound  " << up->first << " " << up->second << std::endl;
+    std::cout << "lower bound  " << lo->first << " " << lo->second << std::endl;
+    std::cout << "===========================================================" << std::endl << "100" << std::endl;
+    up = tree.upper_bound(100);
+    lo = tree.lower_bound(100);
+    std::cout << "upper bound  " << up->first << " " << up->second << std::endl;
+    std::cout << "lower bound  " << lo->first << " " << lo->second << std::endl;
 
     std::cout << "is empty : " << tree.empty() << std::endl;
     std::cout << "is size : " << tree.size() << std::endl;

@@ -359,7 +359,7 @@ namespace ft
                 {
                     if (_comp(n->value.first, k) && n->right)
                         n = n->right;
-                    else if (n->value.first == k)
+                    else if (n->value.first == k && n->right)
                         n = n->right;
                     else if (n->left)
                         n = n->left;
@@ -369,7 +369,7 @@ namespace ft
                         {
                             if (_comp(n->value.first, k))
                                 n = n->parent;
-                            else
+                            else if (n->value.first != k)
                                 return n;
                         }
                     }
