@@ -365,9 +365,11 @@ namespace ft
                         n = n->left;
                     else
                     {
+                        if (n == node_element::getMax(n))
+                            return _endNode;
                         while (n->parent)
                         {
-                            if (_comp(n->value.first, k))
+                            if (_comp(n->value.first, k) || n->value.first == k)
                                 n = n->parent;
                             else if (n->value.first != k)
                                 return n;
