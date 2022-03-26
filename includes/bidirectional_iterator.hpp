@@ -1,23 +1,28 @@
 #ifndef BIDIRECTIONAL_ITERATOR_HPP
 # define BIDIRECTIONAL_ITERATOR_HPP
 # include "tools.hpp"
+# include "iterator_traits.hpp"
 
 namespace ft
 {
     template<class T>
-    class bidirectional_iterator
+    class bidirectional_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
     {
         
         public:
-            typedef T value_type;
-            typedef value_type& reference;
-            typedef value_type* pointer;
+            typedef typename    ft::iterator<std::random_access_iterator_tag, T>::iterator_category	iterator_category;
+			typedef typename    ft::iterator<std::random_access_iterator_tag, T>::value_type        value_type;
+    		typedef typename    ft::iterator<std::random_access_iterator_tag, T>::difference_type	difference_type;
+			typedef             T*                                                                  pointer;
+    		typedef             T&			                                                        reference;
             typedef ft::node<value_type> node_element;
             typedef node_element* node_pointer;
+
 
             bidirectional_iterator() : _ptr(NULL), _endNode(NULL) {}
             bidirectional_iterator(node_pointer ptr, node_pointer endNode) : _ptr(ptr), _endNode(endNode) {}
             bidirectional_iterator(bidirectional_iterator const& it) : _ptr(it._ptr), _endNode(it._endNode) {}
+            
             bidirectional_iterator& operator= (bidirectional_iterator const& it)
             {
                 _ptr = it._ptr;
@@ -27,9 +32,9 @@ namespace ft
 
             ~bidirectional_iterator() {}
 
-            operator bidirectional_iterator<const value_type> ()
+            operator bidirectional_iterator<const T>()
             {
-                return bidirectional_iterator<const value_type>(_ptr, _endNode);
+                return bidirectional_iterator<const T>((ft::node<const T>*)_ptr, (ft::node<const T>*)_endNode); 
             }
 
             reference operator*() const
@@ -42,19 +47,6 @@ namespace ft
             }
             bidirectional_iterator operator++()
             {
-            //    if (this->_ptr->parent && this->_ptr->parent == this->_ptr->left)
-            //         this->_ptr = this->_ptr->right;
-            //     else if (this->_ptr->parent && this->_ptr->isleft && (!this->_ptr->left && !this->_ptr->right))
-            //         this->_ptr = this->_ptr->parent;
-            //     else if (!this->_ptr->isleft && !this->_ptr->right)
-            //         this->_ptr = ft::node::getParentPredecessor(this->_ptr);
-            //     else
-            //     {
-            //         if (!ft::node::getSuccessor(this->_ptr))
-            //             this->_ptr = this->_ptr->parent;
-            //         else
-            //             this->_ptr = ft::node::getSuccessor(this->_ptr);
-            //     }
                 _ptr = ft::node<value_type>::getSuccesser(_ptr);
                 if (!_ptr)
                     this->_ptr = this->_endNode;

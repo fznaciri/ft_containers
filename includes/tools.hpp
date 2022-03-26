@@ -167,8 +167,12 @@ namespace ft
                     return NULL;
                 if (n->isLeft && n->parent)
                     return n->parent;
-                else if (!n->isLeft && n->parent->parent)
-                    return n->parent->parent;
+                else if (!n->isLeft && n->parent)
+                {
+                    while (n->parent && n->parent->value.first < n->value.first)
+                        n = n->parent;
+                    return n->parent;
+                }
             }
             tmp = n->right;
             while (tmp->left)

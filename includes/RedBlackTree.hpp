@@ -25,7 +25,7 @@ namespace ft
             typedef ft::bidirectional_iterator<value_type> iterator;
             typedef ft::bidirectional_iterator<const value_type> const_iterator;
             typedef ft::reverse_iterator<iterator> reverse_iterator;
-            typedef ft::reverse_iterator<const iterator> const_reverse_iterator;
+            typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
             typedef ptrdiff_t difference_type;
             typedef size_t size_type;
             typedef ft::node<value_type> node_element;
@@ -56,7 +56,7 @@ namespace ft
                 _allocNode.deallocate(_endNode, 1);
             }
 
-            ft::pair<bool, bool> insert(const value_type& v)
+            ft::pair<iterator, bool> insert(const value_type& v)
             {
                 node_pointer new_node = _allocNode.allocate(1);
                 _allocNode.construct(new_node, node_element());
@@ -67,9 +67,9 @@ namespace ft
                     _root->black = true;
                     _endNode->parent = _endNode->left = _root;
                     _size++;
-                    return ft::make_pair(true, true);
+                    return ft::make_pair(iterator(_root, _endNode), true);
                 }
-                ft::pair<bool, bool> r =  add(new_node, _root);
+                ft::pair<iterator, bool> r =  add(new_node, _root);
                  _endNode->parent = _endNode->left = _root;
                 checkColor(new_node);
                 return r;
@@ -106,23 +106,41 @@ namespace ft
             size_type    max_size() const { return _allocNode.max_size(); }
 
             // Iterators
-            iterator begin() { return iterator(node_element::getMin(_root) ? node_element::getMin(_root) : _endNode , _endNode); }
-            const_iterator begin() const { return const_iterator(node_element::getMin(_root) ? node_element::getMin(_root) : _endNode, _endNode); }
+            iterator begin()
+            {
+                node_pointer n = node_element::getMin(_root);
+                if (!n)
+                    n = _endNode;
+                return iterator(n, _endNode);
+            }
+            const_iterator begin() const
+            {
+                node_pointer n = node_element::getMin(_root);
+                if (!n)
+                    n = _endNode;
+                return iterator(n, _endNode);
+            }
             iterator end() { return iterator(_endNode, _endNode); }
-            const_iterator end() const { return const_iterator(_endNode, _endNode); }
-            reverse_iterator rbegin() { return reverse_iterator(end()); }
-            const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
-            reverse_iterator rend() { return reverse_iterator(begin()); }
-            const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+            const_iterator end() const { return iterator(_endNode, _endNode); }
+            reverse_iterator rbegin() { return reverse_iterator(iterator(_endNode, _endNode)); }
+            const_reverse_iterator rbegin() const { return reverse_iterator(iterator(_endNode, _endNode)); }
+            reverse_iterator rend()
+            {
+                return reverse_iterator(iterator(node_element::getMin(_root) ? node_element::getMin(_root) : _endNode , _endNode));
+            }
+            const_reverse_iterator rend() const 
+            {
+                return reverse_iterator(iterator(node_element::getMin(_root) ? node_element::getMin(_root) : _endNode , _endNode));
+            }
 
 
             iterator lower_bound(key_type const& key) { return iterator(find_lowerbound(key), _endNode); }
-            const_iterator lower_bound(key_type const& key) const { return const_iterator(find_lowerbound(key), _endNode); }
+            const_iterator lower_bound(key_type const& key) const { return iterator(find_lowerbound(key), _endNode); }
             iterator upper_bound(key_type const& key) { return iterator(find_upperbound(key), _endNode); }
-            const_iterator upper_bound(key_type const& key) const { return const_iterator(find_upperbound(key), _endNode); }
+            const_iterator upper_bound(key_type const& key) const { return iterator(find_upperbound(key), _endNode); }
 
             iterator    find(key_type const& key) {   return iterator(find(_root, key), _endNode); }
-            const_iterator  find(key_type const& key) const {   return const_iterator(find(_root, key), _endNode); }
+            const_iterator  find(key_type const& key) const {   return iterator(find(_root, key), _endNode); }
             size_type contain(key_type const& key) const
             {
                 if (find(_root, key) == _endNode)
@@ -155,14 +173,14 @@ namespace ft
                 std::cout << "======================================================================================" << std::endl;
             }
         private:
-            ft::pair<bool, bool> add(node_pointer newnode, node_pointer parent)
+            ft::pair<iterator, bool> add(node_pointer newnode, node_pointer parent)
             {
                 if (parent->value.first == newnode->value.first)
                 {
                     _alloc.destroy(&(newnode->value));
                     _allocNode.destroy(newnode);
                     _allocNode.deallocate(newnode, 1);
-                    return ft::make_pair(false, false);
+                    return ft::make_pair(iterator(parent, _endNode), false);
                 }
                 if (_comp(parent->value.first, newnode->value.first))
                 {
@@ -172,7 +190,7 @@ namespace ft
                         newnode->parent = parent;
                         newnode->isLeft = false;
                         _size++;
-                        return ft::make_pair(true, true);
+                        return ft::make_pair(iterator(newnode, _endNode), true);
                     }
                     return add(newnode, parent->right);
                 }
@@ -181,7 +199,7 @@ namespace ft
                     parent->left = newnode;
                     newnode->parent = parent;
                     _size++;
-                    return ft::make_pair(true, true);
+                    return ft::make_pair(iterator(newnode, _endNode), true);
                 }
                 return add(newnode, parent->left);
             }

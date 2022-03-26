@@ -16,7 +16,7 @@ namespace ft
             typedef typename iterator_traits<Iterator>::pointer pointer;
             typedef typename iterator_traits<Iterator>::reference reference;
 
-        reverse_iterator() {}	
+        reverse_iterator(): _iter(iterator_type())  {}	
         
         explicit reverse_iterator (iterator_type it):  _iter(it) { }	
         
@@ -28,6 +28,7 @@ namespace ft
             _iter = rev_it.base();
             return *this;
         }
+        
         // operator reverse_iterator< const iterator_type> ()
         // {
         //     return reverse_iterator< const iterator_type>(_iter);
