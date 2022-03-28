@@ -71,15 +71,15 @@ namespace ft
                 }
                 ft::pair<iterator, bool> r =  add(new_node, _root);
                  _endNode->parent = _endNode->left = _root;
-                checkColor(new_node);
+                if (r.second)
+                    checkColor(new_node);
                 return r;
             }
 
             size_type    erase(key_type const& key)
             {
                 node_pointer tmp = find(_root, key);
-                std::cout << tmp->value.first << std::endl;
-                if (!tmp)
+                if (tmp == _endNode)
                     return 0;
                 tmp = swap_poisition(tmp);
                 if (!tmp->black || _root == tmp)
@@ -97,8 +97,8 @@ namespace ft
 
             void    clear()
             {
-                // while (_root)
-                //     erase(_root->value.first);
+                while (_root)
+                    erase(_root->value.first);
             }
 
             bool    empty() const { return _size == 0; }
@@ -370,32 +370,71 @@ namespace ft
                     return find_upperbound(k);
                 return n;
             }
+            // node_pointer    find_upperbound(key_type const& k) const
+            // {
+            //     node_pointer n = _root;
+            //     while (n)
+            //     {
+            //         if (_comp(n->value.first, k) && n->right)
+            //             n = n->right;
+            //         else if (n->value.first == k && n->right)
+            //             n = n->right;
+            //         else if (n->left)
+            //             n = n->left;
+            //         else
+            //         {
+            //             if (n == node_element::getMax(n) && k == n->value.first)
+            //                 return _endNode;
+            //             while (n->parent)
+            //             {
+            //                 if (_comp(n->value.first, k) || n->value.first == k)
+            //                     n = n->parent;
+            //                 else if (n->value.first != k)
+            //                     return n;
+            //             }
+            //         }
+            //     }
+            //     return n;
+            // }
             node_pointer    find_upperbound(key_type const& k) const
             {
-                node_pointer n = _root;
-                while (n)
+                node_pointer tmp = _root;
+                while (tmp)
                 {
-                    if (_comp(n->value.first, k) && n->right)
-                        n = n->right;
-                    else if (n->value.first == k && n->right)
-                        n = n->right;
-                    else if (n->left)
-                        n = n->left;
+                    if (tmp->value.first == k)
+                        return node_element::getSuccesser(tmp);
+                    if (this->_comp(tmp->value.first, k))
+                    {
+                        if (!tmp->right)
+                            return getBigger(tmp, k);
+                        tmp = tmp->right;
+                    }
                     else
                     {
-                        if (n == node_element::getMax(n))
-                            return _endNode;
-                        while (n->parent)
-                        {
-                            if (_comp(n->value.first, k) || n->value.first == k)
-                                n = n->parent;
-                            else if (n->value.first != k)
-                                return n;
-                        }
+                        if (!tmp->left)
+                            return getBigger(tmp, k);
+                        tmp = tmp->left;
                     }
                 }
-                return n;
+                return tmp;
             }
+
+            node_pointer    getBigger(node_pointer node, key_type k) const
+            {
+                node_pointer tmp = node;
+                if (k < tmp->value.first)
+                    return tmp;
+                while (tmp)
+                {
+                    if (tmp->isLeft)
+                        return tmp->parent;
+                    if (_comp(node->value.first, tmp->value.first))
+                        return tmp;
+                    tmp = tmp->parent;
+                }
+                return _endNode;
+            }
+
             // node_pointer    find_upperbound(node_pointer root, key_type const& k) const
             // {
             //     if (!root->isLeft && root->right && !_comp(root->right->value.first, k) && root->value.first != k && !root->left)
@@ -489,25 +528,28 @@ namespace ft
             }
             node_pointer    swap_poisition(node_pointer n)
             {
-                node_pointer tmp;
+                node_pointer tmp = NULL;
                 if (!n)
                     return NULL;
                 if (!n->left && !n->right)
                     return n;
-                tmp = n->right;
-                while (tmp->left)
-                    tmp = tmp->left;
-                if (!tmp)
+                if (n->right)
+                {
+                    tmp = n->right;
+                    while (tmp->left)
+                        tmp = tmp->left; // tmp = d
+                }
+                else if (n->left)
                 {
                     tmp = n->left;
                     while (tmp->right)
                         tmp = tmp->right;
                 }
-                if (tmp->right || tmp->left)
-                    swap_poisition(tmp);
                 ft::pair<key_type, mapped_type> tmp1(n->value);
                 _alloc.construct(&n->value, tmp->value);
                 _alloc.construct(&tmp->value, tmp1);
+                if (tmp->right || tmp->left)
+                   return swap_poisition(tmp);
                 return tmp;
             }
 

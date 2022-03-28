@@ -10,9 +10,9 @@ namespace ft
     {
         
         public:
-            typedef typename    ft::iterator<std::random_access_iterator_tag, T>::iterator_category	iterator_category;
-			typedef typename    ft::iterator<std::random_access_iterator_tag, T>::value_type        value_type;
-    		typedef typename    ft::iterator<std::random_access_iterator_tag, T>::difference_type	difference_type;
+            typedef typename    ft::iterator<std::bidirectional_iterator_tag, T>::iterator_category	iterator_category;
+			typedef typename    ft::iterator<std::bidirectional_iterator_tag, T>::value_type        value_type;
+    		typedef typename    ft::iterator<std::bidirectional_iterator_tag, T>::difference_type	difference_type;
 			typedef             T*                                                                  pointer;
     		typedef             T&			                                                        reference;
             typedef ft::node<value_type> node_element;
@@ -41,7 +41,7 @@ namespace ft
             {
                 return _ptr->value;
             } 
-            pointer operator->()
+            pointer operator->() const
             {
                 return &(operator*());
             }

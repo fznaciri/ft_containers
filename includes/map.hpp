@@ -111,7 +111,7 @@ namespace ft
             template <class InputIterator>
             void insert (InputIterator first, InputIterator last)
             {
-                while (first != last)
+                for (;first != last; first++)
                     _tree.insert(ft::make_pair(first->first, first->second));
             }
             void erase (iterator position) { _tree.erase(position->first); }
