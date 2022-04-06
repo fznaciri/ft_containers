@@ -1,5 +1,5 @@
-#ifndef REDBLACKTREE_HPP
-# define REDBLACKTREE_HPP
+#ifndef REDBLACKTREESET_HPP
+# define REDBLACKTREESET_HPP
 # include <iostream>
 # include <memory>
 # include "tools.hpp"
@@ -7,14 +7,11 @@
 # include "reverse_iterator.hpp"
 # define COUNT 25
 
-namespace ft
-{
-    template <class T, class Alloc = std::allocator<T>, class Compare = std::less<typename T::first_type> >
-    class RedBlackTree
+namespace ft {
+    template <class T, class Alloc = std::allocator<T>, class Compare = std::less<T> >
+    class RedBlackTreeSet
     {
         public:
-            typedef typename T::first_type key_type; 
-            typedef typename T::second_type mapped_type;
             typedef T value_type;
             typedef Compare comp;
             typedef Alloc allocator_type;
@@ -40,7 +37,7 @@ namespace ft
             comp            _comp;
 
 
-            RedBlackTree(const comp& com = comp(),
+            RedBlackTreeSet(const comp& com = comp(),
               const allocator_type& alloc = allocator_type()) : _alloc(alloc), _allocNode(allocator_node()), _root(NULL), _size(0), _comp(com)
             {
                 _endNode = _allocNode.allocate(1);
@@ -48,7 +45,7 @@ namespace ft
                 _alloc.construct(&(_endNode->value), value_type());
                 _endNode->parent = NULL;
             }
-            ~RedBlackTree()
+            ~RedBlackTreeSet()
             {
                 clear();
                 _alloc.destroy(&_endNode->value);
@@ -76,7 +73,7 @@ namespace ft
                 return r;
             }
 
-            size_type    erase(key_type const& key)
+            size_type    erase(value_type const& key)
             {
                 node_pointer tmp = find(_root, key);
                 if (tmp == _endNode)
@@ -98,7 +95,7 @@ namespace ft
             void    clear()
             {
                 while (_root)
-                    erase(_root->value.first);
+                    erase(_root->value);
             }
 
             bool    empty() const { return _size == 0; }
@@ -134,14 +131,11 @@ namespace ft
             }
 
 
-            iterator lower_bound(key_type const& key) { return iterator(find_lowerbound(key), _endNode); }
-            const_iterator lower_bound(key_type const& key) const { return iterator(find_lowerbound(key), _endNode); }
-            iterator upper_bound(key_type const& key) { return iterator(find_upperbound(key), _endNode); }
-            const_iterator upper_bound(key_type const& key) const { return iterator(find_upperbound(key), _endNode); }
+            iterator lower_bound(value_type const& key) const { return iterator(find_lowerbound(key), _endNode); }
+            iterator upper_bound(value_type const& key) const { return iterator(find_upperbound(key), _endNode); }
 
-            iterator    find(key_type const& key) {   return iterator(find(_root, key), _endNode); }
-            const_iterator  find(key_type const& key) const {   return iterator(find(_root, key), _endNode); }
-            size_type contain(key_type const& key) const
+            iterator    find(value_type const& key) const {   return iterator(find(_root, key), _endNode); }
+            size_type contain(value_type const& key) const
             {
                 if (find(_root, key) == _endNode)
                     return 0;
@@ -175,14 +169,14 @@ namespace ft
         private:
             ft::pair<iterator, bool> add(node_pointer newnode, node_pointer parent)
             {
-                if (parent->value.first == newnode->value.first)
+                if (parent->value == newnode->value)
                 {
                     _alloc.destroy(&(newnode->value));
                     _allocNode.destroy(newnode);
                     _allocNode.deallocate(newnode, 1);
                     return ft::make_pair(iterator(parent, _endNode), false);
                 }
-                if (_comp(parent->value.first, newnode->value.first))
+                if (_comp(parent->value, newnode->value))
                 {
                     if (!parent->right)
                     {
@@ -353,31 +347,32 @@ namespace ft
                 leftrotation(newnode);
             }
 
-            node_pointer    find(node_pointer root, key_type const& k) const
+            node_pointer    find(node_pointer root, value_type const& k) const
             {
                 if (!root)
                     return _endNode;
-                if (root->value.first == k)
+                if (root->value == k)
                     return root;
-                if (_comp(root->value.first, k))
+                if (_comp(root->value, k))
                     return find(root->right, k);
                 return find(root->left, k);
             }
-            node_pointer    find_lowerbound(key_type const& k) const
+            node_pointer    find_lowerbound(value_type const& k) const
             {
                 node_pointer n = find(_root, k);
                 if (n == _endNode)
                     return find_upperbound(k);
                 return n;
             }
-            node_pointer    find_upperbound(key_type const& k) const
+            
+            node_pointer    find_upperbound(value_type const& k) const
             {
                 node_pointer tmp = _root;
                 while (tmp)
                 {
-                    if (tmp->value.first == k)
+                    if (tmp->value == k)
                         return node_element::getSuccesser(tmp);
-                    if (this->_comp(tmp->value.first, k))
+                    if (_comp(tmp->value, k))
                     {
                         if (!tmp->right)
                             return getBigger(tmp, k);
@@ -393,23 +388,22 @@ namespace ft
                 return tmp;
             }
 
-            node_pointer    getBigger(node_pointer node, key_type k) const
+            node_pointer    getBigger(node_pointer node, value_type k) const
             {
                 node_pointer tmp = node;
-                if (k < tmp->value.first)
+                if (k < tmp->value)
                     return tmp;
                 while (tmp)
                 {
                     if (tmp->isLeft)
                         return tmp->parent;
-                    if (_comp(tmp->value.first, k))
+                    if (_comp(tmp->value, k))
                         return tmp;
                     tmp = tmp->parent;
                 }
                 return _endNode;
             }
 
-         
             void    fixDoubleBlack(node_pointer db)
         
             {
@@ -500,7 +494,7 @@ namespace ft
                 {
                     tmp = n->right;
                     while (tmp->left)
-                        tmp = tmp->left; // tmp = d
+                        tmp = tmp->left;
                 }
                 else if (n->left)
                 {
@@ -508,16 +502,14 @@ namespace ft
                     while (tmp->right)
                         tmp = tmp->right;
                 }
-                ft::pair<key_type, mapped_type> tmp1(n->value);
+                value_type tmp1(n->value);
                 _alloc.construct(&n->value, tmp->value);
                 _alloc.construct(&tmp->value, tmp1);
                 if (tmp->right || tmp->left)
                    return swap_poisition(tmp);
                 return tmp;
-            }
+            }     
     };
-    
-} // namespace ft
-
+}
 
 #endif

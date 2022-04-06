@@ -169,7 +169,7 @@ namespace ft
                     return n->parent;
                 else if (!n->isLeft && n->parent)
                 {
-                    while (n->parent && n->parent->value.first < n->value.first)
+                    while (n->parent && n->parent->value < n->value)
                         n = n->parent;
                     return n->parent;
                 }
